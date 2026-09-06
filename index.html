@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code — Generator va Skaner</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>QR Code Studio</h1>
+  <p class="subtitle">QR kod yaratish va skanerlash — bitta joyda</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="generate">Yaratish</button>
+  <button class="tab-btn" data-tab="scan">Skanerlash</button>
+  <button class="tab-btn" data-tab="history">Tarix</button>
+</nav>
+
+<main>
+  <!-- GENERATE TAB -->
+  <section id="tab-generate" class="tab-panel active">
+    <div class="panel-grid">
+      <div class="form-card">
+        <label for="qr-type">QR turi</label>
+        <select id="qr-type">
+          <option value="text">Matn / Havola (URL)</option>
+          <option value="wifi">Wi-Fi tarmoq</option>
+          <option value="vcard">Vizit karta</option>
+          <option value="tel">Telefon raqami</option>
+          <option value="email">Email</option>
+        </select>
+
+        <div id="fields-text" class="type-fields">
+          <label for="f-text">Matn yoki havola</label>
+          <textarea id="f-text" rows="3" placeholder="https://misol.uz yoki istalgan matn"></textarea>
+        </div>
+
+        <div id="fields-wifi" class="type-fields hidden">
+          <label for="f-wifi-ssid">Tarmoq nomi (SSID)</label>
+          <input type="text" id="f-wifi-ssid" placeholder="Wi-Fi nomi">
+          <label for="f-wifi-pass">Parol</label>
+          <input type="text" id="f-wifi-pass" placeholder="Parol">
+          <label for="f-wifi-enc">Shifrlash turi</label>
+          <select id="f-wifi-enc">
+            <option value="WPA">WPA/WPA2</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">Shifrlanmagan</option>
+          </select>
+          <label class="checkbox-label"><input type="checkbox" id="f-wifi-hidden"> Yashirin tarmoq</label>
+        </div>
+
+        <div id="fields-vcard" class="type-fields hidden">
+          <label for="f-vc-name">Ism Familiya</label>
+          <input type="text" id="f-vc-name" placeholder="Ism Familiya">
+          <label for="f-vc-org">Tashkilot</label>
+          <input type="text" id="f-vc-org" placeholder="Kompaniya nomi (ixtiyoriy)">
+          <label for="f-vc-tel">Telefon</label>
+          <input type="text" id="f-vc-tel" placeholder="+998901234567">
+          <label for="f-vc-email">Email</label>
+          <input type="email" id="f-vc-email" placeholder="email@misol.uz">
+        </div>
+
+        <div id="fields-tel" class="type-fields hidden">
+          <label for="f-tel">Telefon raqami</label>
+          <input type="text" id="f-tel" placeholder="+998901234567">
+        </div>
+
+        <div id="fields-email" class="type-fields hidden">
+          <label for="f-email-addr">Email manzil</label>
+          <input type="email" id="f-email-addr" placeholder="email@misol.uz">
+          <label for="f-email-subj">Mavzu</label>
+          <input type="text" id="f-email-subj" placeholder="Mavzu (ixtiyoriy)">
+          <label for="f-email-body">Xabar matni</label>
+          <textarea id="f-email-body" rows="2" placeholder="Xabar (ixtiyoriy)"></textarea>
+        </div>
+
+        <div class="options-row">
+          <div>
+            <label for="opt-size">O'lcham: <span id="opt-size-val">256</span>px</label>
+            <input type="range" id="opt-size" min="128" max="512" step="32" value="256">
+          </div>
+          <div>
+            <label for="opt-ecl">Xato tuzatish darajasi</label>
+            <select id="opt-ecl">
+              <option value="L">Past (L)</option>
+              <option value="M" selected>O'rta (M)</option>
+              <option value="Q">Yuqori (Q)</option>
+              <option value="H">Eng yuqori (H)</option>
+            </select>
+          </div>
+          <div class="color-row">
+            <label for="opt-color-dark">Rang</label>
+            <input type="color" id="opt-color-dark" value="#0f172a">
+          </div>
+          <div class="color-row">
+            <label for="opt-color-light">Fon</label>
+            <input type="color" id="opt-color-light" value="#ffffff">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btn-generate" class="btn-primary">QR yaratish</button>
+          <button id="btn-clear" class="btn-secondary">Tozalash</button>
+        </div>
+        <p id="generate-error" class="error-text hidden"></p>
+      </div>
+
+      <div class="result-card">
+        <div id="qrcode-canvas" class="qrcode-box"></div>
+        <button id="btn-download" class="btn-primary hidden">PNG yuklab olish</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCAN TAB -->
+  <section id="tab-scan" class="tab-panel">
+    <div class="panel-grid">
+      <div class="form-card">
+        <h2>Kameradan skanerlash</h2>
+        <div class="btn-row">
+          <button id="btn-cam-start" class="btn-primary">Kamerani yoqish</button>
+          <button id="btn-cam-stop" class="btn-secondary hidden">To'xtatish</button>
+        </div>
+        <video id="scan-video" class="scan-video hidden" playsinline muted></video>
+        <p id="scan-status" class="hint-text"></p>
+
+        <h2>Yoki rasm yuklang</h2>
+        <input type="file" id="file-upload" accept="image/*">
+      </div>
+
+      <div class="result-card">
+        <h2>Natija</h2>
+        <div id="scan-result-box" class="scan-result hidden">
+          <p id="scan-result-text" class="scan-result-text"></p>
+          <div class="btn-row">
+            <button id="btn-copy-result" class="btn-secondary">Nusxalash</button>
+            <a id="link-open-result" class="btn-primary hidden" href="#" target="_blank" rel="noopener">Ochish</a>
+          </div>
+        </div>
+        <p id="scan-empty" class="hint-text">Hali natija yo'q</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY TAB -->
+  <section id="tab-history" class="tab-panel">
+    <div class="history-header">
+      <h2>So'nggi amallar</h2>
+      <button id="btn-clear-history" class="btn-secondary">Tarixni tozalash</button>
+    </div>
+    <ul id="history-list" class="history-list"></ul>
+    <p id="history-empty" class="hint-text">Tarix bo'sh</p>
+  </section>
+</main>
+
+<canvas id="hidden-canvas" class="hidden"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
